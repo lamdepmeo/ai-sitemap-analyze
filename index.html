@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Sitemap Analyzer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="hero">
+        <h1>AI Sitemap Analyzer</h1>
+        <p>Phân tích sitemap với provider AI do bạn tự chọn và tự nhập API key/model.</p>
+      </header>
+
+      <section class="card controls">
+        <label for="providerSelect">AI Provider</label>
+        <div class="row">
+          <select id="providerSelect">
+            <option value="openai">OpenAI</option>
+            <option value="gemini">Gemini</option>
+            <option value="claude">Claude</option>
+            <option value="grok">Grok (xAI)</option>
+            <option value="openrouter">OpenRouter</option>
+            <option value="custom">Custom</option>
+          </select>
+          <input id="apiKey" type="password" placeholder="API key" />
+          <input id="modelName" type="text" placeholder="Model (vd: gpt-4.1-mini)" />
+        </div>
+        <div id="customProviderFields" class="row hidden" style="margin-top:10px;">
+          <input id="customBaseUrl" type="url" placeholder="Custom base URL (vd: https://api.example.com/v1/chat/completions)" />
+          <select id="customApiStyle">
+            <option value="chat">OpenAI-compatible Chat Completions</option>
+            <option value="responses">OpenAI Responses API</option>
+          </select>
+        </div>
+
+        <label for="sitemapUrl" style="margin-top:10px;">Sitemap URL</label>
+        <div class="row">
+          <input id="sitemapUrl" type="url" placeholder="https://example.com/sitemap.xml" />
+          <select id="modeSelect">
+            <option value="quick">Quick (ít token)</option>
+            <option value="balanced" selected>Balanced</option>
+            <option value="deep">Deep (nhiều mẫu hơn)</option>
+          </select>
+          <button id="analyzeBtn">Phân tích AI</button>
+        </div>
+
+        <textarea id="customCategories" rows="3" placeholder="(Tùy chọn) Nhập URL chuyên mục, mỗi dòng 1 URL
+https://example.com/category/seo
+https://example.com/category/technical-seo"></textarea>
+      </section>
+
+      <section id="status" class="status hidden"></section>
+      <section id="progressWrap" class="card hidden">
+        <div class="progress-title">AI thinking... <span id="progressPercent">0%</span></div>
+        <div class="progress-bar"><span id="progressBarFill"></span></div>
+      </section>
+
+      <section id="dashboard" class="hidden">
+        <div class="toolbar">
+          <button id="exportJsonBtn" class="secondary">Export JSON</button>
+          <button id="exportCsvBtn" class="secondary">Export CSV</button>
+          <button id="exportPdfBtn" class="secondary">Export PDF</button>
+        </div>
+
+        <div class="metrics-grid">
+          <article class="metric card"><h2>Tổng URL</h2><p id="totalUrls">0</p></article>
+          <article class="metric card"><h2>Điểm SEO</h2><p id="seoScore">0/100</p></article>
+          <article class="metric card"><h2>URL sâu (&gt;3)</h2><p id="deepUrls">0</p></article>
+          <article class="metric card"><h2>URL có params</h2><p id="paramUrls">0</p></article>
+          <article class="metric card"><h2>Nội dung mới (<=30d)</h2><p id="freshNewPct">0%</p></article>
+          <article class="metric card"><h2>Cần cập nhật (>12m)</h2><p id="stalePct">0%</p></article>
+        </div>
+
+        <div class="panel-grid">
+          <article class="card chart-card"><h3>Biểu đồ danh mục nội dung</h3><canvas id="categoryChart" width="520" height="260"></canvas></article>
+          <article class="card chart-card"><h3>Biểu đồ lỗi kỹ thuật</h3><canvas id="issueChart" width="520" height="260"></canvas></article>
+          <article class="card chart-card"><h3>Biểu đồ độ mới nội dung</h3><canvas id="freshnessChart" width="520" height="260"></canvas></article>
+          <article class="card chart-card"><h3>Biểu đồ SEO Onpage</h3><canvas id="onpageChart" width="520" height="260"></canvas></article>
+        </div>
+
+        <div class="panel-grid">
+          <article class="card fixed-box"><h3>Issue Breakdown</h3><ul id="issueBreakdownList" class="list scroll-box"></ul></article>
+          <article class="card fixed-box"><h3>AI Multi-Prompt Insights</h3><ul id="aiStageList" class="list scroll-box"></ul></article>
+          <article class="card fixed-box"><h3>Gợi ý tối ưu AI</h3><ul id="recommendationList" class="list scroll-box"></ul></article>
+          <article class="card fixed-box"><h3>Tổng quan SEO Onpage</h3><ul id="onpageList" class="list scroll-box"></ul></article>
+        </div>
+
+        <article class="card table-card">
+          <h3>Phân tích danh mục URL</h3>
+          <table>
+            <thead><tr><th>Danh mục</th><th>Số URL</th><th>Tỷ lệ</th><th>Depth TB</th><th>Param %</th><th>Priority TB</th><th>Changefreq chính</th></tr></thead>
+            <tbody id="categoryTableBody"></tbody>
+          </table>
+        </article>
+
+        <article class="card table-card fixed-table-card">
+          <h3>Chi tiết URL lỗi (hover để xem chi tiết)</h3>
+          <table>
+            <thead><tr><th>URL</th><th>Loại trang</th><th>Thuộc chuyên mục</th><th>Priority</th><th>Changefreq</th><th>Lỗi</th></tr></thead>
+            <tbody id="diagnosticTableBody"></tbody>
+          </table>
+        </article>
+      </section>
+
+      <footer class="product-footer card">
+        <p>© 2026 Minh Pham Ngoc. All rights reserved.</p>
+      </footer>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
