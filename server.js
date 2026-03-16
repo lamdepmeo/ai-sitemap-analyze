@@ -30,6 +30,18 @@ function extractJsonText(raw) {
     return null;
   }
 }
+function buildCustomProviderUrl(baseUrl, apiStyle = 'chat') {
+  const raw = (baseUrl || '').trim();
+  if (!raw) return '';
+
+  const normalized = raw.replace(/\/+$/, '');
+  const hasKnownEndpoint = /(\/chat\/completions|\/responses)$/i.test(normalized);
+  if (hasKnownEndpoint) return normalized;
+
+  if (apiStyle === 'responses') return `${normalized}/responses`;
+  return `${normalized}/chat/completions`;
+}
+
 
 async function callProviderJson(providerConfig, payload, maxOutputTokens = 900) {
   const provider = (providerConfig?.provider || '').toLowerCase();
@@ -114,6 +126,10 @@ async function callProviderJson(providerConfig, payload, maxOutputTokens = 900) 
     if (!baseUrl) throw new Error('Vui lòng nhập Custom base URL.');
 
     const useResponses = provider === 'custom' && providerConfig.apiStyle === 'responses';
+    const url =
+      provider === 'custom'
+        ? buildCustomProviderUrl(baseUrl, providerConfig.apiStyle)
+        : baseUrl;
     const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` };
     const body = useResponses
       ? {
@@ -133,7 +149,7 @@ async function callProviderJson(providerConfig, payload, maxOutputTokens = 900) 
           ],
         };
 
-    const r = await fetch(baseUrl, { method: 'POST', headers, body: JSON.stringify(body) });
+    const r = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
     if (!r.ok) throw new Error(`${provider} lỗi ${r.status}: ${await r.text()}`);
     const data = await r.json();
     const txt = useResponses
