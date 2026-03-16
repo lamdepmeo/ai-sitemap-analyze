@@ -22,6 +22,18 @@ function extractJsonText(raw) {
   }
 }
 
+function buildCustomProviderUrl(baseUrl, apiStyle = 'chat') {
+  const raw = (baseUrl || '').trim();
+  if (!raw) return '';
+
+  const normalized = raw.replace(/\/+$/, '');
+  const hasKnownEndpoint = /(\/chat\/completions|\/responses)$/i.test(normalized);
+  if (hasKnownEndpoint) return normalized;
+
+  if (apiStyle === 'responses') return `${normalized}/responses`;
+  return `${normalized}/chat/completions`;
+}
+
 async function callProviderJson(providerConfig, payload, maxOutputTokens = 900) {
   const provider = (providerConfig?.provider || '').toLowerCase();
   const apiKey = providerConfig?.apiKey;
@@ -107,7 +119,10 @@ async function callProviderJson(providerConfig, payload, maxOutputTokens = 900) 
     if (!baseUrl) throw new Error('Vui lòng nhập Custom base URL.');
 
     const useResponses = provider === 'custom' && providerConfig.apiStyle === 'responses';
-    const url = baseUrl;
+    const url =
+      provider === 'custom'
+        ? buildCustomProviderUrl(baseUrl, providerConfig.apiStyle)
+        : baseUrl;
     const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` };
 
     const body = useResponses
